@@ -1,30 +1,73 @@
 #include "../include/parse.h"
-#include <boost/program_options.hpp>
 
-Parse::Parse(int ac, char *av[]){
-  int opt;
-  desc.add_options()("help", "produce help message")("batch", po::value<int>(),
-    "if set, program runs automatically and you should state the number of "
-    "cycles")("sleep", po::value<int>(&opt)->default_value(def_val),
-    "the number of miliseconds to wait before new generation "
-    "generated, default value is 1000")("size", po::value<string>(),
-    "the size of the grid, you can state this value by passing NxM where N "
-    "the number of rows, M the number of columns, for example --size 20x30")(
-    "put", po::value<vector<string>>(),
-    "initial alive cells, you can type many cells by passing NxM where N the "
-    "number of row and M the number of column, for example --put 3x7 --put "
-    "5x4");
 
-  po::variables_map vm;
-  po::store(po::parse_command_line(ac, av, desc), vm);
-  po::notify(vm);
-  //
+Parse::Parse(po::variables_map vm){
+  this->vm = vm;
 }
 
-bool Parse::is_set(string s){
-    return vm.count(s) > 0;
+int Parse::get_n(){
+  return n;
 }
 
-bool Parse::is_set(int x,int y){
-    return points.count({x,y}) > 0;
+int Parse::get_m(){
+  return m;
+}
+
+vector<string> Parse::get_grid(){
+  return points;
+}
+
+bool Parse::is_set(int x, int y) {
+  string s1 = to_string(x) + "x" + to_string(y);
+  string s2 = to_string(y) + "x" + to_string(x);
+  vector<string> v = vm["put"].as<vector<string>>(); 
+  for(int i = 0; i < v.size(); i++){
+    if(s1 == v[i] ||s2 == v[i] ){
+      return true;
+    }
+  }
+  return false;
+ }
+
+bool Parse::has_x(string s) {
+  return s.find('x') < s.length() - 1 && s.find('x') > 0;
+}
+
+pair<int, int> Parse::split(string s) {
+  int pos = s.find('x');
+  int left = stoi(s.substr(0, pos));
+  int right = stoi(s.substr(pos + 1, s.length()));
+  return {left, right};
+}
+
+bool Parse::is_valid(string s) {
+  pair<int, int> x = split(s);
+  return x.first > 0 && x.second > 0;
+}
+
+pair<int, int> Parse::get_point(string s) {
+  if (has_x(s) && is_valid(s)) {
+    return split(s);
+  } else {
+    cout << "Incorrect input in size or put" << endl;
+    exit(0);
+  }
+}
+
+po::variables_map  Parse::get_vm(){
+  return vm;
+}
+
+void Parse::get_cells() {
+  points = vm["put"].as<vector<string>>();
+  for (int i = 0; i < points.size(); i++) {
+    get_point(points[i]);
+  }
+}
+
+void Parse::build_all() {
+  pair<int, int> p = get_point(vm["size"].as<string>());
+  n = p.first;
+  m = p.second;
+  get_cells();
 }

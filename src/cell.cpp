@@ -8,11 +8,8 @@ bool Cell::get_state(){
     return state;
 }
 
-Cell Cell::live(int x,int y, Field *f){
+Cell Cell::live(int x,int y, int n, int m, vector<vector<Cell>> grid){
     int cnt = 0;
-    int n = f->get_n();
-    int m = f->get_m();
-    vector<vector<Cell>> grid = f->get_grid();
     // counting the number of alive neighbours
     if(x + 1 < n){
         cnt += grid[x + 1][y].get_state();
@@ -39,6 +36,6 @@ Cell Cell::live(int x,int y, Field *f){
         cnt += grid[x][y + 1].get_state();
     }
     
-    return Cell(g[x][y].get_state() && (cnt == 2 || cnt == 3) || !g[x][y].get_state() && (cnt == 3));
+    return Cell(grid[x][y].get_state() && (cnt == 2 || cnt == 3) || !grid[x][y].get_state() && (cnt == 3));
 
 }
