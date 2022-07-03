@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include "../include/field.h"
 #include "../include/parse.h"
+#include <unistd.h>
 
 const int t = 1000;
 
@@ -9,27 +9,25 @@ void sleep(int x) {
   usleep(microsecond);
 }
 
-Field f;
 Parse p;
-void rec(int depth, int max_depth, bool flag, Field cur) {
+void rec(int depth, int max, bool flag, Field cur) {
   cout << "\033[2J\033[1;1H";
-  if (depth > max_depth) {
+  if (depth > max) {
     return;
   }
   cur.print();
-  Field new_field = cur.live();
+  Field next = cur.live();
   if (flag) {
     cout << "If you want to play more press \"n\", else \"q\"." << endl;
     string s;
     cin >> s;
-    if (s == "n") {
-      rec(depth, max_depth, true, new_field);
-    } else {
+    if (s != "n") {
       return;
     }
+    rec(depth, max, true, next);
   } else {
-    sleep(p.get_vm()["sleep"].as<int>());
-    rec(depth + 1, max_depth, false, new_field);
+    sleep(p.opts()["sleep"].as<int>());
+    rec(depth + 1, max, false, next);
   }
 }
 const int def_val = 1000;
@@ -54,10 +52,10 @@ int main(int ac, char *av[]) {
   po::notify(vm);
 
   p = Parse(vm);
-  p.build_all();
-  Field clear_f = Field(p.get_n(), p.get_m());
-  Field filled_f = clear_f.rec_for_constructor(0, 0, clear_f);
-  f = filled_f.rec_to_add_points(filled_f,p.get_grid(),0);
+  p.build();
+  Field clear = Field(p.lenght(), p.width());
+  Field filled = clear.rec_live(0, 0, clear, false);
+  Field f = filled.rec_add(filled, p.grid(), 0);
   if (vm.count("batch") > 0) {
     rec(0, vm["batch"].as<int>(), false, f);
   } else {

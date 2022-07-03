@@ -12,21 +12,20 @@ private:
   vector<vector<Cell>> grid;
   int n;
   int m;
-  void print_rec(int depth);
-  void print_2D_rec(int x, int y);
-  Field rec_for_live(int x, int y, Field cur);
+  void rec_line_print(int depth);
+  void rec_grid_print(int x, int y);
 
 public:
-  Field(){};
+  Field();
   Field(int n, int m);
   Field(int n, int m, vector<vector<Cell>> grid); // constructors
 
-  int get_n();
-  int get_m();
-  vector<vector<Cell>> get_grid(); // getters
+  int length();
+  int width();
+  vector<vector<Cell>> field(); // getters
 
-  Field rec_for_constructor(int x, int y, Field cur);
-  Field rec_to_add_points(Field cur, vector<string> s, int pos);
+  Field rec_add(Field cur, vector<string> s, int pos);
+  Field rec_live(int x, int y, Field cur, bool flag);
 
   Field live();
   Field with(int x, int y, Cell a);

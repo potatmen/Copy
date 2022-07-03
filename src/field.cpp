@@ -2,28 +2,14 @@
 #include "../include/parse.h"
 const int add = 5;
 
-Field Field::rec_for_constructor(int x, int y, Field cur) {
-  if (y == m) {
-    return rec_for_constructor(x + 1, 0, cur);
-  }
-
-  if (x == n) {
-    Field result = Field(cur.get_n(), cur.get_m(), cur.get_grid());
-    return result;
-  }
-
-  Cell new_cell = Cell(false);
-  return rec_for_constructor(x, y + 1, cur.with(x, y, new_cell));
-}
-
-Field Field::rec_to_add_points(Field cur, vector<string> s, int pos) {
+Field Field::rec_add(Field cur, vector<string> s, int pos) {
   if (pos == s.size()) {
-    Field result = Field(cur.get_n(), cur.get_m(), cur.get_grid());
+    Field result = Field(cur.length(), cur.width(), cur.field());
     return result;
   }
   Parse p = Parse();
-  pair<int,int> x = p.get_point(s[pos]);
-  return rec_to_add_points(cur.with(x.first - 1,x.second - 1, Cell(true)),s,pos + 1);
+  pair<int, int> x = p.point(s[pos]);
+  return rec_add(cur.with(x.first - 1, x.second - 1, Cell(true)), s, pos + 1);
 }
 
 Field::Field(int n, int m, vector<vector<Cell>> grid) {
@@ -33,81 +19,86 @@ Field::Field(int n, int m, vector<vector<Cell>> grid) {
 }
 
 Field::Field(int n, int m) {
-  this->n = n;
-  this->m = m;
   vector<vector<Cell>> t;
   t.resize(n);
   for (int i = 0; i < n; i++) {
     t[i].resize(m);
   }
-  this->grid = t;
+  new (this) Field(n, m, t);
 }
 
+Field::Field() { new (this) Field(0, 0); }
 
-int Field::get_n() { return n; }
+int Field::length() { return n; }
 
-int Field::get_m() { return m; }
+int Field::width() { return m; }
 
-vector<vector<Cell>> Field::get_grid() { return grid; }
+vector<vector<Cell>> Field::field() { return grid; }
 
-void Field::print_rec(int depth) {
+void Field::rec_line_print(int depth) {
   if (depth == m * 2 + add) {
     cout << "\n";
     return;
   }
   cout << "-";
-  print_rec(depth + 1);
+  rec_line_print(depth + 1);
 }
 
-void Field::print_2D_rec(int x, int y) {
-  if (y >= m) {
-    cout << " |\n";
-    print_2D_rec(x + 1, 0);
+void Field::rec_grid_print(int x, int y) {
+
+  if (x >= n) {
     return;
   }
 
-  if (x >= n) {
+  if (y >= m) {
+    cout << " |\n";
+    rec_grid_print(x + 1, 0);
     return;
   }
 
   if (y == 0) {
     cout << "|  ";
   }
-  if (grid[x][y].get_state()) {
+
+  if (grid[x][y].status()) {
     cout << "o ";
   } else {
     cout << ". ";
   }
-  print_2D_rec(x, y + 1);
+  rec_grid_print(x, y + 1);
 }
 
-Field Field::rec_for_live(int x, int y, Field cur) {
+Field Field::rec_live(int x, int y, Field cur, bool flag) {
   if (y == m) {
-    return rec_for_live(x + 1, 0, cur);
+    return rec_live(x + 1, 0, cur, flag);
   }
 
   if (x == n) {
-    Field result = Field(cur.get_n(), cur.get_m(), cur.get_grid());
+    Field result = Field(cur.length(), cur.width(), cur.field());
     return result;
   }
-
-  Cell new_cell = cur.get_grid()[x][y].live(x, y, this->get_n(),this->get_m(),this->get_grid());
-  return rec_for_live(x, y + 1, cur.with(x, y, new_cell));
+  Cell replace;
+  if (flag) {
+    replace = cur.field()[x][y].live(x, y, n, m, grid);
+  } else {
+    replace = Cell(false);
+  }
+  return rec_live(x, y + 1, cur.with(x, y, replace), flag);
 }
 
 void Field::print() {
-  print_rec(0);
-  print_2D_rec(0, 0);
-  print_rec(0);
-  
+  rec_line_print(0);
+  rec_grid_print(0, 0);
+  rec_line_print(0);
 }
 
-Field Field::live() { 
-  Field obj = Field(this->n,this->m,this->grid);
-  return rec_for_live(0, 0, obj); }
+Field Field::live() {
+  Field obj = Field(n, m, grid);
+  return rec_live(0, 0, obj, true);
+}
 
 Field Field::with(int x, int y, Cell a) {
-  vector<vector<Cell>> new_grid = grid;
-  new_grid[x][y] = a;
-  return Field(n, m, new_grid);
+  vector<vector<Cell>> next = grid;
+  next[x][y] = a;
+  return Field(n, m, next);
 }

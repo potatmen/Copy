@@ -1,36 +1,17 @@
 #include "../include/parse.h"
 
+Parse::Parse(po::variables_map vm) { this->vm = vm; }
 
-Parse::Parse(po::variables_map vm){
-  this->vm = vm;
-}
+Parse::Parse() { new (this) Parse(NULL); }
 
-int Parse::get_n(){
-  return n;
-}
+int Parse::lenght() { return n; }
 
-int Parse::get_m(){
-  return m;
-}
+int Parse::width() { return m; }
 
-vector<string> Parse::get_grid(){
-  return points;
-}
+vector<string> Parse::grid() { return points; }
 
-bool Parse::is_set(int x, int y) {
-  string s1 = to_string(x) + "x" + to_string(y);
-  string s2 = to_string(y) + "x" + to_string(x);
-  vector<string> v = vm["put"].as<vector<string>>(); 
-  for(int i = 0; i < v.size(); i++){
-    if(s1 == v[i] ||s2 == v[i] ){
-      return true;
-    }
-  }
-  return false;
- }
-
-bool Parse::has_x(string s) {
-  return s.find('x') < s.length() - 1 && s.find('x') > 0;
+bool Parse::has(string s, char c) {
+  return s.find(c) < s.length() - 1 && s.find(c) > 0;
 }
 
 pair<int, int> Parse::split(string s) {
@@ -40,34 +21,31 @@ pair<int, int> Parse::split(string s) {
   return {left, right};
 }
 
-bool Parse::is_valid(string s) {
+bool Parse::valid(string s) {
   pair<int, int> x = split(s);
   return x.first > 0 && x.second > 0;
 }
 
-pair<int, int> Parse::get_point(string s) {
-  if (has_x(s) && is_valid(s)) {
+pair<int, int> Parse::point(string s) {
+  if (has(s, 'x') && valid(s)) {
     return split(s);
-  } else {
-    cout << "Incorrect input in size or put" << endl;
-    exit(0);
   }
+  cout << "Incorrect input in size or put";
+  exit(0);
 }
 
-po::variables_map  Parse::get_vm(){
-  return vm;
-}
+po::variables_map Parse::opts() { return vm; }
 
-void Parse::get_cells() {
+void Parse::cells() {
   points = vm["put"].as<vector<string>>();
   for (int i = 0; i < points.size(); i++) {
-    get_point(points[i]);
+    point(points[i]);
   }
 }
 
-void Parse::build_all() {
-  pair<int, int> p = get_point(vm["size"].as<string>());
+void Parse::build() {
+  pair<int, int> p = point(vm["size"].as<string>());
   n = p.first;
   m = p.second;
-  get_cells();
+  cells();
 }
