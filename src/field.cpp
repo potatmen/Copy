@@ -1,43 +1,30 @@
-#include <utility>
 
 #include "../include/field.h"
+
 #include "../include/parse.h"
 const int add = 5;
 
-Field::Field(int n, int m, vector<vector<Cell>> grid) {
-  this->n = n;
-  this->m = m;
-  this->grid = std::move(grid);
-}
-
-Field::Field(int n, int m) {
-  vector<vector<Cell>> t;
-  t.resize(n);
+vector<vector<Cell>> Field::make_grid(int n, int m) {
+  vector<vector<Cell>> g;
+  g.resize(n);
   for (int i = 0; i < n; i++) {
-    t[i].resize(m);
+    g[i].resize(m);
   }
-  new (this) Field(n, m, t);
+  return g;
 }
-
-Field::Field() { new (this) Field(0, 0); }
-
-int Field::length() const { return n; }
-
-int Field::width() const { return m; }
-
 vector<vector<Cell>> Field::field() { return grid; }
 
 Field Field::rec_add(Field cur, vector<string> s, int pos) {
   if (pos == s.size()) {
-    Field result = Field(cur.length(), cur.width(), cur.field());
-    return result;
+    return cur;
   }
   Parse p = Parse();
-  pair<int, int> x = p.point(s[pos]);
+  pair<int, int> x = Parse::point(s[pos]);
   return rec_add(cur.with(x.first - 1, x.second - 1, Cell(true)), s, pos + 1);
 }
 
 void Field::rec_line_print(int depth) {
+  int m = grid[0].size();
   if (depth == m * 2 + add) {
     cout << "\n";
     return;
@@ -47,7 +34,8 @@ void Field::rec_line_print(int depth) {
 }
 
 void Field::rec_grid_print(int x, int y) {
-
+  int n = grid.size();
+  int m = grid[0].size();
   if (x >= n) {
     return;
   }
@@ -71,17 +59,18 @@ void Field::rec_grid_print(int x, int y) {
 }
 
 Field Field::rec_live(int x, int y, Field cur, bool flag) {
+  int n = grid.size();
+  int m = grid[0].size();
+
   if (y == m) {
     return rec_live(x + 1, 0, cur, flag);
   }
-
   if (x == n) {
-    Field result = Field(cur.length(), cur.width(), cur.field());
-    return result;
+    return cur;
   }
   Cell replace;
   if (flag) {
-    replace = cur.field()[x][y].live(x, y, n, m, grid);
+    replace = cur.field()[x][y].live(count(x, y));
   } else {
     replace = Cell(false);
   }
@@ -95,12 +84,45 @@ void Field::print() {
 }
 
 Field Field::live() {
-  Field obj = Field(n, m, grid);
+  Field obj = Field(grid);
   return rec_live(0, 0, obj, true);
 }
 
 Field Field::with(int x, int y, Cell a) {
   vector<vector<Cell>> next = grid;
   next[x][y] = a;
-  return Field(n, m, next);
+  return Field(next);
+}
+
+int Field::count(int x, int y) {
+  int cnt = 0;
+  int n = grid.size();
+  int m = grid[0].size();
+
+  // counting the number of alive neighbours
+  if (x + 1 < n) {
+    cnt += static_cast<int>(grid[x + 1][y].status());
+    if (y > 0) {
+      cnt += static_cast<int>(grid[x + 1][y - 1].status());
+    }
+    if (y < m - 1) {
+      cnt += static_cast<int>(grid[x + 1][y + 1].status());
+    }
+  }
+  if (x > 0) {
+    cnt += static_cast<int>(grid[x - 1][y].status());
+    if (y > 0) {
+      cnt += static_cast<int>(grid[x - 1][y - 1].status());
+    }
+    if (y < m - 1) {
+      cnt += static_cast<int>(grid[x - 1][y + 1].status());
+    }
+  }
+  if (y > 0) {
+    cnt += static_cast<int>(grid[x][y - 1].status());
+  }
+  if (y < m - 1) {
+    cnt += static_cast<int>(grid[x][y + 1].status());
+  }
+  return cnt;
 }

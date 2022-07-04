@@ -1,12 +1,8 @@
-#include <utility>
-
 #include "../include/parse.h"
 
-Parse::Parse(po::variables_map vm) { this->vm = std::move(vm); }
+#include <utility>
 
-Parse::Parse() { new (this) Parse(nullptr); }
-
-int Parse::lenght() const { return n; }
+int Parse::length() const { return n; }
 
 int Parse::width() const { return m; }
 

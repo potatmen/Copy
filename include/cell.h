@@ -9,13 +9,14 @@ private:
   bool state;
 
 public:
-  Cell();
-  Cell(bool state); // constructors
+  Cell(bool st) : state(st) {}
+  Cell() : Cell(false) {}
 
-  bool status() const; // getter
+  // constructors
 
-  static Cell live(int x, int y, int n, int m,
-                   vector<vector<Cell>> grid); // process
+  bool status() const;  // getter
+
+  Cell live(int cnt) const;  // process
 };
 
-#endif //_OOP_CELL_H_
+#endif  //_OOP_CELL_H_
