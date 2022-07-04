@@ -9,8 +9,7 @@ void sleep(int x) {
   usleep(microsecond);
 }
 
-Parse p;
-void rec(int depth, int max, bool flag, Field cur) {
+void rec(int depth, int max, bool flag, Field cur, Parse p) {
   cout << "\033[2J\033[1;1H";
   if (depth > max) {
     return;
@@ -18,16 +17,16 @@ void rec(int depth, int max, bool flag, Field cur) {
   cur.print();
   Field next = cur.live();
   if (flag) {
-    cout << "If you want to play more press \"n\", else \"q\"." << endl;
+    cout << R"(If you want to play more press "n", else "q".)" << endl;
     string s;
     cin >> s;
     if (s != "n") {
       return;
     }
-    rec(depth, max, true, next);
+    rec(depth, max, true, next, p);
   } else {
     sleep(p.opts()["sleep"].as<int>());
-    rec(depth + 1, max, false, next);
+    rec(depth + 1, max, false, next, p);
   }
 }
 const int def_val = 1000;
@@ -51,14 +50,14 @@ int main(int ac, char *av[]) {
   po::store(po::parse_command_line(ac, av, desc), vm);
   po::notify(vm);
 
-  p = Parse(vm);
+  Parse p = Parse(vm);
   p.build();
   Field clear = Field(p.lenght(), p.width());
   Field filled = clear.rec_live(0, 0, clear, false);
   Field f = filled.rec_add(filled, p.grid(), 0);
   if (vm.count("batch") > 0) {
-    rec(0, vm["batch"].as<int>(), false, f);
+    rec(0, vm["batch"].as<int>(), false, f, p);
   } else {
-    rec(0, 0, true, f);
+    rec(0, 0, true, f, p);
   }
 }

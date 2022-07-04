@@ -17,16 +17,16 @@ public:
   Parse();
   Parse(po::variables_map vm); // constructor
 
-  int lenght();
-  int width();
+  int lenght() const;
+  int width() const;
   vector<string> grid();
   po::variables_map opts(); // getters
 
-  bool has(string s, char c);
-  bool valid(string s);
-  pair<int, int> point(string s);
+  static bool has(const string &s, char c);
+  bool valid(string const &s);
+  pair<int, int> point(const string &s);
   void cells();
-  pair<int, int> split(string s);
+  static pair<int, int> split(const string &s);
   void build(); // builders and checkers
 };
 

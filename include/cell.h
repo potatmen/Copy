@@ -12,9 +12,10 @@ public:
   Cell();
   Cell(bool state); // constructors
 
-  bool status(); // getter
+  bool status() const; // getter
 
-  Cell live(int x, int y, int n, int m, vector<vector<Cell>> grid); // process
+  static Cell live(int x, int y, int n, int m,
+                   vector<vector<Cell>> grid); // process
 };
 
 #endif //_OOP_CELL_H_

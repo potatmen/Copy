@@ -1,21 +1,13 @@
+#include <utility>
+
 #include "../include/field.h"
 #include "../include/parse.h"
 const int add = 5;
 
-Field Field::rec_add(Field cur, vector<string> s, int pos) {
-  if (pos == s.size()) {
-    Field result = Field(cur.length(), cur.width(), cur.field());
-    return result;
-  }
-  Parse p = Parse();
-  pair<int, int> x = p.point(s[pos]);
-  return rec_add(cur.with(x.first - 1, x.second - 1, Cell(true)), s, pos + 1);
-}
-
 Field::Field(int n, int m, vector<vector<Cell>> grid) {
   this->n = n;
   this->m = m;
-  this->grid = grid;
+  this->grid = std::move(grid);
 }
 
 Field::Field(int n, int m) {
@@ -29,11 +21,21 @@ Field::Field(int n, int m) {
 
 Field::Field() { new (this) Field(0, 0); }
 
-int Field::length() { return n; }
+int Field::length() const { return n; }
 
-int Field::width() { return m; }
+int Field::width() const { return m; }
 
 vector<vector<Cell>> Field::field() { return grid; }
+
+Field Field::rec_add(Field cur, vector<string> s, int pos) {
+  if (pos == s.size()) {
+    Field result = Field(cur.length(), cur.width(), cur.field());
+    return result;
+  }
+  Parse p = Parse();
+  pair<int, int> x = p.point(s[pos]);
+  return rec_add(cur.with(x.first - 1, x.second - 1, Cell(true)), s, pos + 1);
+}
 
 void Field::rec_line_print(int depth) {
   if (depth == m * 2 + add) {

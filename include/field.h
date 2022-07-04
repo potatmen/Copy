@@ -20,8 +20,8 @@ public:
   Field(int n, int m);
   Field(int n, int m, vector<vector<Cell>> grid); // constructors
 
-  int length();
-  int width();
+  int length() const;
+  int width() const;
   vector<vector<Cell>> field(); // getters
 
   Field rec_add(Field cur, vector<string> s, int pos);
