@@ -26,8 +26,8 @@ public:
   static bool has(const string &s, char c);
   static bool valid(string const &s);
   static pair<int, int> point(const string &s);
-  void cells();
   static pair<int, int> split(const string &s);
+  void cells();
   void build();  // builders and checkers
 };
 

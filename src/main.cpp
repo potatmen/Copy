@@ -52,8 +52,7 @@ int main(int ac, char *av[]) {
   Parse p = Parse(vm);
   p.build();
   Field clear = Field(p.length(), p.width());
-  Field filled = clear.rec_live(0, 0, clear, false);
-  Field f = filled.rec_add(filled, p.grid(), 0);
+  Field f = clear.rec_add(clear, p.grid(), 0);
   if (vm.count("batch") > 0) {
     rec(0, vm["batch"].as<int>(), false, f, p);
   } else {

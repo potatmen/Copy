@@ -4,6 +4,8 @@
 #include "../include/parse.h"
 const int add = 5;
 
+vector<vector<Cell>> Field::field() { return grid; }
+
 vector<vector<Cell>> Field::make_grid(int n, int m) {
   vector<vector<Cell>> g;
   g.resize(n);
@@ -12,7 +14,6 @@ vector<vector<Cell>> Field::make_grid(int n, int m) {
   }
   return g;
 }
-vector<vector<Cell>> Field::field() { return grid; }
 
 Field Field::rec_add(Field cur, vector<string> s, int pos) {
   if (pos == s.size()) {
@@ -58,23 +59,19 @@ void Field::rec_grid_print(int x, int y) {
   rec_grid_print(x, y + 1);
 }
 
-Field Field::rec_live(int x, int y, Field cur, bool flag) {
+Field Field::rec_live(int x, int y, Field cur) {
   int n = grid.size();
   int m = grid[0].size();
 
   if (y == m) {
-    return rec_live(x + 1, 0, cur, flag);
+    return rec_live(x + 1, 0, cur);
   }
   if (x == n) {
     return cur;
   }
-  Cell replace;
-  if (flag) {
-    replace = cur.field()[x][y].live(count(x, y));
-  } else {
-    replace = Cell(false);
-  }
-  return rec_live(x, y + 1, cur.with(x, y, replace), flag);
+  Cell replace = cur.field()[x][y].live(count(x, y));
+
+  return rec_live(x, y + 1, cur.with(x, y, replace));
 }
 
 void Field::print() {
@@ -85,7 +82,7 @@ void Field::print() {
 
 Field Field::live() {
   Field obj = Field(grid);
-  return rec_live(0, 0, obj, true);
+  return rec_live(0, 0, obj);
 }
 
 Field Field::with(int x, int y, Cell a) {
